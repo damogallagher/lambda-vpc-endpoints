@@ -20,7 +20,6 @@ def lambda_handler(event, context):
         body = obj.get()['Body'].read()
         print(f"key:{key}, body:{body}")
 
-    print("Pre return response")
     return {
         "statusCode": 200,
         "headers": {

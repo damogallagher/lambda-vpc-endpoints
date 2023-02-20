@@ -26,6 +26,11 @@ export class LambdaVpcEndpointsStack extends cdk.Stack {
       ]
     });
 
+    this.configureS3Infra(vpc);
+    this.configureSecretsManagerInfra(vpc);
+  }
+
+  configureS3Infra(vpc: ec2.Vpc) {
     // Start of S3 Functionality
     const s3Bucket = new s3.Bucket(this, 'vpc-endpoints-bkt-test', {
       bucketName: 'vpc-endpoints-bkt-test',
@@ -84,7 +89,9 @@ export class LambdaVpcEndpointsStack extends cdk.Stack {
       handler: readS3LambdaHandler
     });
     // End of S3 Functionality
+  }
 
+  configureSecretsManagerInfra(vpc: ec2.Vpc) {
     // Start of Secrets Manager Functionality
     const templatedSecret = new secretsManager.Secret(this, 'LambdaS3Secret', {
       secretName: 'LambdaVPCSecret',
@@ -93,6 +100,11 @@ export class LambdaVpcEndpointsStack extends cdk.Stack {
         generateStringKey: 'password',
       },
     });
+
+    const secretsManagerInterfaceEndpoint = vpc.addInterfaceEndpoint('secretsManager-interface-endpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER
+    });
+
 
     const readSecretsManagerLambdaHandler = new lambda.Function(this, "ReadSecretsManagerLambda", {
       functionName: "readSecretsManagerLambda",
@@ -112,22 +124,25 @@ export class LambdaVpcEndpointsStack extends cdk.Stack {
       }
     });
 
+    // 👇 create a policy statement
+    const readSecretsManagerPolicy = new iam.PolicyStatement({
+      actions: [
+        'secretsmanager:GetSecretValue'
+      ],
+      resources: [templatedSecret.secretArn],
+    });
+
+    // 👇 add the policy to the Function's role
+    readSecretsManagerLambdaHandler.role?.attachInlinePolicy(
+      new iam.Policy(this, 'read-SecretsManager-policy', {
+        statements: [readSecretsManagerPolicy],
+      }),
+    );
+
     const readSecretsManagerApiGateway = new apigw.LambdaRestApi(this, "readSecretsManagerApiGateway", {
       restApiName: "readSecretsManagerApiGateway",
       endpointExportName: "readSecretsManagerApiGatewayExport",
-      handler: readS3LambdaHandler
+      handler: readSecretsManagerLambdaHandler
     });
-
-    // // End of Secrets Manager Functionality
-    // new cdk.CfnOutput(this, 'readS3ApiGateway', {
-    //   value: readS3ApiGateway.url,
-    //   description: 'The url for the read S3 API Gateway Endpoint',
-    //   exportName: 'readS3ApiGatewayExport',
-    // });
-    // new cdk.CfnOutput(this, 'readSecretsManagerApiGateway', {
-    //   value: readSecretsManagerApiGateway.url,
-    //   description: 'The url for the read Secrets Manager API Gateway Endpoint',
-    //   exportName: 'readSecretsManagerApiGatewayExport',
-    // });
   }
 }

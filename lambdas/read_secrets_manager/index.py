@@ -19,6 +19,12 @@ def lambda_handler(event, context):
     secret_response = json.loads(response['SecretString'])
     print(f"secret_response:{secret_response}")
 
-    return { 
-        'secret_response' : secret_response
-    }
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": json.dumps({
+            "secret_response ": secret_response
+        })
+    }       
