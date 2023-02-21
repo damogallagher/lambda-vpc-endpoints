@@ -31,7 +31,7 @@ export class LambdaVpcEndpointsStack extends cdk.Stack {
 
   configureS3Infra(vpc: ec2.Vpc) {
     // Start of S3 Functionality
-    const s3Bucket = new s3.Bucket(this, `vpc-endpoints-bucket -test`, {
+    const s3Bucket = new s3.Bucket(this, `vpc-endpoints-bucket-test`, {
       bucketName: 'vpc-endpoints-bkt-test',
       autoDeleteObjects: true,
       removalPolicy: RemovalPolicy.DESTROY
