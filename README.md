@@ -16,8 +16,10 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 aws configure sso
 
 aws sso login --profile demo1
+
 aws s3 ls --profile demo1
 
 cdk bootstrap --profile demo1
+
 cdk deploy --profile demo1 --require-approval never
 
