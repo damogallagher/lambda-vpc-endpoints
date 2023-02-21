@@ -32,7 +32,8 @@ export class LambdaVpcEndpointsStack extends cdk.Stack {
 
   configureS3Infra(vpc: ec2.Vpc) {
     // Start of S3 Functionality
-    const s3Bucket = new s3.Bucket(this, 'vpc-endpoints-bkt-test', {
+    const accountId = cdk.Stack.of(this).account;
+    const s3Bucket = new s3.Bucket(this, `vpc-endpoints-bkt-test-${accountId}`, {
       bucketName: 'vpc-endpoints-bkt-test',
       autoDeleteObjects: true,
       removalPolicy: RemovalPolicy.DESTROY
@@ -73,8 +74,8 @@ export class LambdaVpcEndpointsStack extends cdk.Stack {
         's3:GetObject'
       ],
       resources: [
-        'arn:aws:s3:::' + s3Bucket.bucketName,
-        'arn:aws:s3:::' + s3Bucket.bucketName + '/*'],
+        s3Bucket.bucketArn,
+        `${s3Bucket.bucketArn}/*`],
     });
 
     // 👇 add the policy to the Function's role
