@@ -12,7 +12,6 @@ import * as secretsManager from 'aws-cdk-lib/aws-secretsmanager';
 export class LambdaVpcEndpointsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
     // The code that defines your stack goes here
 
     const vpc = new ec2.Vpc(this, "Vpc", {
@@ -32,8 +31,7 @@ export class LambdaVpcEndpointsStack extends cdk.Stack {
 
   configureS3Infra(vpc: ec2.Vpc) {
     // Start of S3 Functionality
-    const accountId = cdk.Stack.of(this).account;
-    const s3Bucket = new s3.Bucket(this, `vpc-endpoints-bkt-test-${accountId}`, {
+    const s3Bucket = new s3.Bucket(this, `vpc-endpoints-bucket -test`, {
       bucketName: 'vpc-endpoints-bkt-test',
       autoDeleteObjects: true,
       removalPolicy: RemovalPolicy.DESTROY
